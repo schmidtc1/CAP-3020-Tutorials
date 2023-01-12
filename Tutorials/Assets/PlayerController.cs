@@ -4,14 +4,13 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+
     public float movementSpeed = 1.0f;
     public float jumpStrength = 1.0f;
-
     public float rotationSpeed = 1.0f;
     public float verticalAngleLimit = 85.0f;
 
     private Vector3 currentRotation;
-
     Rigidbody rb;
 
     // Start is called before the first frame update
