@@ -4,13 +4,14 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-
     public float movementSpeed = 1.0f;
     public float jumpStrength = 1.0f;
+
     public float rotationSpeed = 1.0f;
     public float verticalAngleLimit = 85.0f;
 
     private Vector3 currentRotation;
+
     Rigidbody rb;
 
     // Start is called before the first frame update
@@ -69,24 +70,34 @@ public class PlayerController : MonoBehaviour
             direction += Camera.main.transform.right;
         }
 
+        float modSpeed = movementSpeed;
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            modSpeed *= 2;
+        }
+
+        //TODO: Add a "sprint" feature.
         //Get the normalized vector, then scale based on the current speed
         //Q4) Why do we need to normalize here?
-        Vector3 velocity = direction.normalized * movementSpeed;
+        Vector3 velocity = direction.normalized * modSpeed;
 
 
         //Add back the y component
         velocity.y = y;
         //apply the velocity to the player
         rb.velocity = velocity;
-    } 
+    }
 
+    int jumpCount = 0;
     void Jump()
     {
         //When the Space bar is pressed, apply a positive vertical force
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && jumpCount<2)
         {
             rb.AddForce(gameObject.transform.up*jumpStrength, ForceMode.Impulse);
+            jumpCount++;
         }
+
     }
 
     void Rotate()
@@ -103,6 +114,11 @@ public class PlayerController : MonoBehaviour
 
         //rotate the player's view
         Camera.main.transform.rotation = Quaternion.Euler(currentRotation.y, currentRotation.x, 0);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        jumpCount = 0;
     }
 }
 
