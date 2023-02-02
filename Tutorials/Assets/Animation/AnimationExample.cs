@@ -5,6 +5,7 @@ using UnityEngine;
 public class AnimationExample : MonoBehaviour
 {
     Animator anim;
+    bool crouch = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -22,5 +23,15 @@ public class AnimationExample : MonoBehaviour
         {
             anim.SetTrigger("Stop");
         }
+
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            crouch = !crouch;
+            if(crouch)
+                anim.SetTrigger("Crouch");
+            else
+                anim.SetTrigger("Uncrouch");
+        }
+
     }
 }
