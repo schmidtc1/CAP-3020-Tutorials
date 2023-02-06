@@ -14,7 +14,7 @@ public class Human : Entity
         nma.speed = 6.0f;
         MaxHealth = 70;
         Health = MaxHealth;
-        Damage = 50;
+        Damage = 15;
         AttackSpeed = 2.0f;
     }
 
