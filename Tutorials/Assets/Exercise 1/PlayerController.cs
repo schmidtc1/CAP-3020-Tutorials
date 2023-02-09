@@ -4,14 +4,17 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float movementSpeed = 1.0f;
-    public float jumpStrength = 1.0f;
 
-    public float rotationSpeed = 1.0f;
+    public float movementSpeed = 5.0f;
+    private float baseSpeed;
+    public float jumpStrength = 6.0f;
+    public float rotationSpeed = 6.0f;
     public float verticalAngleLimit = 85.0f;
 
-    private Vector3 currentRotation;
+    public int numJumps;
+    public int maxJumps = 2;
 
+    private Vector3 currentRotation;
     Rigidbody rb;
 
     // Start is called before the first frame update
@@ -19,6 +22,8 @@ public class PlayerController : MonoBehaviour
     {
         //Grab the rigidbody we want to manipulate for movement
         rb = GetComponent<Rigidbody>();
+        baseSpeed = movementSpeed;
+        numJumps = 0;
     }
 
     // Update is called once per frame
@@ -53,52 +58,71 @@ public class PlayerController : MonoBehaviour
         //For each movement key, update direction of movement
         //Q2) What would happen if the last three if statements were else-if statements?
         //Q3) What would happen if "Camera.main" was replaced with "gameObject"?
-        if (Input.GetKey(KeyCode.W))
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
         {
+            if (Input.GetKey(KeyCode.LeftControl) && numJumps == 0) // numJumps == 0 means we are on a platform
+            {
+                movementSpeed = 2 * baseSpeed;
+            }
+            else
+            {
+                movementSpeed = baseSpeed;
+            }
             direction += Camera.main.transform.forward;
         }
-        if (Input.GetKey(KeyCode.S))
+        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
         {
+            movementSpeed = baseSpeed;
             direction -= Camera.main.transform.forward;
         }
-        if (Input.GetKey(KeyCode.A))
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
         {
+            movementSpeed = baseSpeed;
             direction -= Camera.main.transform.right;
         }
-        if (Input.GetKey(KeyCode.D))
+        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
         {
+            movementSpeed = baseSpeed;
             direction += Camera.main.transform.right;
         }
 
-        float modSpeed = movementSpeed;
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            modSpeed *= 2;
-        }
-
-        //TODO: Add a "sprint" feature.
         //Get the normalized vector, then scale based on the current speed
         //Q4) Why do we need to normalize here?
-        Vector3 velocity = direction.normalized * modSpeed;
+        Vector3 velocity = direction.normalized * movementSpeed;
 
 
         //Add back the y component
         velocity.y = y;
         //apply the velocity to the player
         rb.velocity = velocity;
-    }
+    } 
 
-    int jumpCount = 0;
     void Jump()
     {
         //When the Space bar is pressed, apply a positive vertical force
-        if (Input.GetKeyDown(KeyCode.Space) && jumpCount<2)
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            rb.AddForce(gameObject.transform.up*jumpStrength, ForceMode.Impulse);
-            jumpCount++;
+            if (numJumps < maxJumps)
+            {
+                rb.AddForce(gameObject.transform.up*jumpStrength, ForceMode.Impulse);
+                numJumps++;
+            }
+            else return;
         }
-
     }
+
+    /* 
+    OnCollision is the cause of bug now: when player hits the ground, the jumps don't reset 
+    */
+
+    void OnCollisionEnter(Collision collision) 
+    {
+        if (collision.gameObject.tag == "Ground") 
+        {
+            numJumps = 0;
+        }
+    }
+
 
     void Rotate()
     {
@@ -114,11 +138,6 @@ public class PlayerController : MonoBehaviour
 
         //rotate the player's view
         Camera.main.transform.rotation = Quaternion.Euler(currentRotation.y, currentRotation.x, 0);
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        jumpCount = 0;
     }
 }
 
