@@ -8,6 +8,8 @@ public class EntityPanel : MonoBehaviour
     public TextMeshProUGUI entityText;
     public Image healthBarInner;
     public Entity curr;
+    public GameObject obj;
+    public Material store;
     // Start is called before the first frame update
     void Start()
     {
@@ -22,12 +24,23 @@ public class EntityPanel : MonoBehaviour
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, 100)) {
+                if (obj != null) {
+                    obj.GetComponent<MeshRenderer>().material = store;
+                }
                 curr = hit.transform.gameObject.GetComponent<Entity>();
+                if (curr != null) {
+                    obj = hit.transform.gameObject;
+                    store = obj.GetComponent<MeshRenderer>().material; 
+                }
             }
         }
         if (curr != null) {
             healthBarInner.fillAmount = (float) curr.Health / curr.MaxHealth;
             entityText.SetText(curr.name);
+
+
+            Material m = Resources.Load<Material>("Selected");
+            obj.GetComponent<MeshRenderer>().material = m;
         }
         else {
             entityText.SetText("No target");
